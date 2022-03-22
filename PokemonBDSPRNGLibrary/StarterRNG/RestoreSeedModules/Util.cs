@@ -20,9 +20,9 @@ namespace PokemonBDSPRNGLibrary.StarterRNG.RestoreSeedModules
             return 22;
         }
 
-        public static uint GetRawInt(this float rand)
+        public static uint GetRawInt(this float rand, float munchlaxBlink = 0.285f)
         {
-            var r = 12.0f - (rand - MUNCHLAX_BLINK);
+            var r = 12.0f - (rand - munchlaxBlink);
             if (r < 0) r = 0;
 
             var raw = (uint)(r / 9.0f * 8388607.0f);
@@ -32,7 +32,5 @@ namespace PokemonBDSPRNGLibrary.StarterRNG.RestoreSeedModules
         }
 
         public static uint GetBits(this uint rand, int n) => (rand >> (23 - n)) & ((1u << n) - 1);
-
-        public const float MUNCHLAX_BLINK = 0.285f;
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using PokemonPRNG.XorShift128;
-using static PokemonBDSPRNGLibrary.StarterRNG.RestoreSeedModules.Util;
 
 namespace PokemonBDSPRNGLibrary.StarterRNG
 {
@@ -14,9 +13,9 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
             return (raw, raw % 1_000_000);
         }
 
-        public static float BlinkMunchlax(this ref (uint s0, uint s1, uint s2, uint s3) state)
+        public static float BlinkMunchlax(this ref (uint s0, uint s1, uint s2, uint s3) state, float munchlaxBlink = 0.285f)
         {
-            return state.GetRand_f(3.0f, 12.0f) + MUNCHLAX_BLINK;
+            return state.GetRand_f(3.0f, 12.0f) + munchlaxBlink;
         }
     }
 }

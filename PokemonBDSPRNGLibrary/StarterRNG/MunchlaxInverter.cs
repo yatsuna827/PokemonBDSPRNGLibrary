@@ -20,6 +20,7 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
         public int BlinkCount { get; private set; }
 
         private readonly uint epsilon;
+        private readonly float munchlaxBlink;
         private readonly BitPacker bitPacker = new BitPacker();
         private readonly List<float> intervals = new List<float>();
         private readonly List<uint[]> matrix = new List<uint[]>();
@@ -31,8 +32,9 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
         /// 
         /// </summary>
         /// <param name="eps">許容する観測誤差(秒)。</param>
-        public MunchlaxInverter(float eps = 0.1f)
-            => this.epsilon = (uint)((0x7F_FFFFu / 9.0f) * eps);
+        /// <param name="munchlaxBlink">ゴンベの瞬きにかかる時間。</param>
+        public MunchlaxInverter(float eps = 0.1f, float munchlaxBlink = 0.285f)
+            => (this.epsilon, this.munchlaxBlink) = ((uint)((0x7F_FFFFu / 9.0f) * eps), munchlaxBlink);
 
         /// <summary>
         /// 観測したゴンベの瞬き間隔を入力する。
@@ -44,7 +46,7 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
 
             intervals.Add(interval);
 
-            var raw = interval.GetRawInt();
+            var raw = interval.GetRawInt(munchlaxBlink);
             var n = raw.CountConfidenceBits(epsilon);
             if (n == 0)
             {

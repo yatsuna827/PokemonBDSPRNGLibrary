@@ -11,10 +11,13 @@ uint RandomUint()
     return (RandomUint(), RandomUint(), RandomUint(), RandomUint());
 }
 
+const float esp = 0;
+WriteLine($"esp = {esp}[sec]");
+
 while (true)
 {
     var seed = GenerateSeed();
-    var inverter = new MunchlaxInverter();
+    var inverter = new MunchlaxInverter(esp);
 
     (uint, uint, uint, uint) restored;
 
@@ -23,7 +26,7 @@ while (true)
     {
         // 観測値を取得
         // 0.1以内でランダムに誤差を挿入する
-        var interval = rand.BlinkMunchlax().Randomize(0.01f);
+        var interval = rand.BlinkMunchlax().Randomize(esp);
         inverter.AddInterval(interval);
 
         if (inverter.TryRestoreState(out restored))
@@ -40,7 +43,7 @@ while (true)
 
 static class Ext
 {
-    public static float Randomize(this float value, float ep = 0.1f, float min = 3.0f, float max = 12.0f)
+    public static float Randomize(this float value, float ep = 0.1f, float min = 3.0f + 0.285f, float max = 12.0f + 0.285f)
     {
         var random = new Random();
         value += (float)(random.NextDouble() * ep) * (random.Next() % 2 == 0 ? 1 : -1);

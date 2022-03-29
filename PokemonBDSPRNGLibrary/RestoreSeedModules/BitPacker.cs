@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PokemonBDSPRNGLibrary.StarterRNG.RestoreSeedModules
+namespace PokemonBDSPRNGLibrary.RestoreSeedModules
 {
     // ビットを32bit配列に詰めていくためのクラス.
     class BitPacker

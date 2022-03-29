@@ -1,4 +1,5 @@
-﻿using PokemonBDSPRNGLibrary.StarterRNG;
+﻿using PokemonBDSPRNGLibrary.RestoreSeed;
+using PokemonBDSPRNGLibrary.StarterRNG;
 using static System.Console;
 
 uint RandomUint()
@@ -11,35 +12,75 @@ uint RandomUint()
     return (RandomUint(), RandomUint(), RandomUint(), RandomUint());
 }
 
-const float esp = 0;
-WriteLine($"esp = {esp}[sec]");
+const int MODE = 0; // 0: ゴンベのデモ, other: 主人公瞬きのデモ
 
-while (true)
+if(MODE == 0)
 {
-    var seed = GenerateSeed();
-    var inverter = new MunchlaxInverter(esp);
+    const float esp = 0;
+    WriteLine($"esp = {esp}[sec]");
 
-    (uint, uint, uint, uint) restored;
-
-    var rand = seed;
     while (true)
     {
-        // 観測値を取得
-        // 0.1以内でランダムに誤差を挿入する
-        var interval = rand.BlinkMunchlax().Randomize(esp);
-        inverter.AddInterval(interval);
+        var seed = GenerateSeed();
+        var inverter = new MunchlaxInverter(esp);
 
-        if (inverter.TryRestoreState(out restored))
-            break;
+        (uint, uint, uint, uint) restored;
+
+        var rand = seed;
+        while (true)
+        {
+            // 観測値を取得
+            // 0.1以内でランダムに誤差を挿入する
+            var interval = rand.BlinkMunchlax().Randomize();
+            inverter.AddInterval(interval);
+
+            if (inverter.TryRestoreState(out restored))
+                break;
+        }
+
+        WriteLine();
+
+        WriteLine($"expected: {seed.ToHexString()}");
+        WriteLine($"restored: {restored.ToHexString()}");
+        WriteLine(restored == seed ? "Successfully restored." : "Failed...");
+        WriteLine($"blink: {inverter.BlinkCount} times");
+        ReadKey();
+        WriteLine();
     }
-
-    WriteLine($"expected: {seed.ToHexString()}");
-    WriteLine($"restored: {restored.ToHexString()}");
-    WriteLine(restored == seed ? "Successfully restored." : "Failed...");
-    WriteLine($"blink: {inverter.BlinkCount} times");
-    ReadKey();
-    WriteLine();
 }
+else
+{
+    while (true)
+    {
+        var seed = GenerateSeed();
+        var inverter = new PlayerBlinkInverter();
+
+        (uint, uint, uint, uint) restored;
+
+        var rand = seed;
+        while (true)
+        {
+            // 観測値を取得
+            var blink = rand.BlinkPlayer();
+            inverter.AddBlink(blink);
+
+            Write(blink == PlayerBlink.None ? "- " : blink == PlayerBlink.Single ? "s " : "d ");
+
+            if (inverter.TryRestoreState(out restored))
+                break;
+        }
+
+        WriteLine();
+
+        WriteLine($"expected: {seed.ToHexString()}");
+        WriteLine($"restored: {restored.ToHexString()}");
+        WriteLine(restored == seed ? "Successfully restored." : "Failed...");
+        WriteLine($"blink roll: {inverter.BlinkCount} times");
+        ReadKey();
+        WriteLine();
+    }
+}
+
 
 static class Ext
 {

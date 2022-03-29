@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PokemonBDSPRNGLibrary.StarterRNG.RestoreSeedModules
+namespace PokemonBDSPRNGLibrary.RestoreSeedModules
 {
     internal static class Matrix128
     {

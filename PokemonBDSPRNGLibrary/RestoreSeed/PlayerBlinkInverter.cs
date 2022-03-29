@@ -4,9 +4,9 @@ using System.Linq;
 using PokemonPRNG.XorShift128;
 using PokemonBDSPRNGLibrary.RestoreSeedModules;
 
-namespace PokemonBDSPRNGLibrary.StarterRNG
+namespace PokemonBDSPRNGLibrary.RestoreSeed
 {
-    public class MunchlaxInverter
+    public class PlayerBlinkInverter
     {
         /// <summary>
         /// 保持しているビット数。
@@ -19,45 +19,30 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
         /// </summary>
         public int BlinkCount { get; private set; }
 
-        private readonly uint epsilon;
-        private readonly float munchlaxBlink;
         private readonly BitPacker bitPacker = new BitPacker();
-        private readonly List<float> intervals = new List<float>();
         private readonly List<uint[]> matrix = new List<uint[]>();
         private readonly (uint, uint, uint, uint)[] vectors = Enumerable.Range(0, 128).Select(_ => Matrix128.GetBase(_ / 32, _ % 32)).ToArray();
 
         private uint[][] inv = null;
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="eps">許容する観測誤差(秒)。</param>
-        /// <param name="munchlaxBlink">ゴンベの瞬きにかかる時間。</param>
-        public MunchlaxInverter(float eps = 0.1f, float munchlaxBlink = 0.285f)
-            => (this.epsilon, this.munchlaxBlink) = ((uint)((0x7F_FFFFu / 9.0f) * eps), munchlaxBlink);
-
-        /// <summary>
         /// 観測したゴンベの瞬き間隔を入力する。
         /// </summary>
         /// <param name="interval">観測された瞬き間隔(秒)。</param>
-        public void AddInterval(float interval)
+        public void AddBlink(PlayerBlink blinkType)
         {
             BlinkCount++;
 
-            intervals.Add(interval);
-
-            var raw = interval.GetRawInt(munchlaxBlink);
-            var n = raw.CountConfidenceBits(epsilon);
-            if (n == 0)
+            if (blinkType == PlayerBlink.None)
             {
                 for (int i = 0; i < vectors.Length; i++) vectors[i].GetRand();
                 return;
             }
 
-            var temp = Enumerable.Range(0, n).Select(_ => new uint[4]).ToArray();
+            var temp = Enumerable.Range(0, 4).Select(_ => new uint[4]).ToArray();
             for (int i = 0; i < vectors.Length; i++)
             {
-                var rand = vectors[i].GetRand().GetBits(n);
+                var rand = vectors[i].GetRand() & 0xF;
                 var (col, bit) = (i / 32, i % 32);
                 foreach (var row in temp)
                 {
@@ -66,9 +51,10 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
                 }
             }
 
-            bitPacker.Pack(raw.GetBits(n), n);
+            var u4 = blinkType == PlayerBlink.Single ? 0u : 1u;
+            bitPacker.Pack(u4, 4);
             matrix.AddRange(temp);
-            Entropy += n;
+            Entropy += 4;
         }
 
         /// <summary>

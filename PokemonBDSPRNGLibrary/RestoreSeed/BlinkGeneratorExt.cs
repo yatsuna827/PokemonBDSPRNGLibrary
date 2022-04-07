@@ -18,5 +18,23 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             var r = state.GetRand() & 0xF;
             return r == 0 ? PlayerBlink.Single : r == 1 ? PlayerBlink.Double : PlayerBlink.None;
         }
+        public static uint GetNextPlayerBlink(this ref (uint s0, uint s1, uint s2, uint s3) state)
+        {
+            for(uint i = 1; ; i++)
+            {
+                if (state.BlinkPlayer() != PlayerBlink.None) return i;
+            }
+        }
+        public static uint GetNextPlayerBlink(this ref (uint s0, uint s1, uint s2, uint s3) state, out PlayerBlink blink)
+        {
+            for (uint i = 1; ; i++)
+            {
+                blink = state.BlinkPlayer();
+                if (blink != PlayerBlink.None) return i;
+            }
+        }
+
+        public static string ToShortString(this PlayerBlink blink)
+            => blink == PlayerBlink.None ? "-" : blink == PlayerBlink.Single ? "S" : "D";
     }
 }

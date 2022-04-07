@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using PokemonPRNG.XorShift128;
 using static System.Console;
 
@@ -8,52 +8,38 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
 {
     public class PlayerLinearSearch
     {
-        private readonly List<int> intervals = new List<int>();
+        private readonly List<uint> intervals = new List<uint>();
+        public int BlinkCount { get => intervals.Count; }
 
-        public void AddInterval(int interval)
+        public void AddInterval(uint interval)
         {
             intervals.Add(interval);
         }
         public IEnumerable<(uint index, (uint s0, uint s1, uint s2, uint s3) state)> Search((uint s0, uint s1, uint s2, uint s3) state, uint max)
         {
-            var blinkCache = new int[256];
-            var lastBlink = -1;
-            var idx = 0;
-            for(int i = 0; i < intervals.Count; idx++)
-            {
-                if (state.BlinkPlayer() != PlayerBlink.None)
-                {
-                    if (lastBlink != -1)
-                    {
-                        var b = idx - lastBlink;
-                        blinkCache[i] = b;
-                        i++;
-                    }
-                    lastBlink = idx;
-                }
-            }
-            bool check(int k)
-            {
-                for (int i = 0; i < intervals.Count; i++)
-                {
-                    var b = blinkCache[(k + i) & 0xFF];
-                    if (intervals[i] != b) return false;
-                }
+            var indexQueue = new Queue<uint>();
+            var intervalQueue = new Queue<uint>();
 
-                return true;
-            }
-            int head = 0, tail = intervals.Count;
-            while (head <= max)
+            var idx = state.GetNextPlayerBlink();
+            for(int i = 0; i < intervals.Count; i++)
             {
-                while (true)
-                {
-                    idx++;
-                    if (state.BlinkPlayer() != PlayerBlink.None)break;
-                }
-                var interval = idx - lastBlink;
-                blinkCache[tail++ & 0xFF] = interval;
-                if (check(head++)) yield return ((uint)lastBlink, state);
-                lastBlink = idx;
+                var interval = state.GetNextPlayerBlink();
+                idx += interval;
+
+                indexQueue.Enqueue(idx);
+                intervalQueue.Enqueue(interval);
+            }
+            
+            for (int head = 0, tail = intervals.Count; head <= max; head++, tail++)
+            {
+                if (intervals.SequenceEqual(intervalQueue)) yield return (idx, state);
+
+                var interval = state.GetNextPlayerBlink();
+                idx += interval;
+                indexQueue.Enqueue(idx);
+                intervalQueue.Enqueue(interval);
+                indexQueue.Dequeue();
+                intervalQueue.Dequeue();
             }
         }
 
@@ -63,23 +49,24 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             {
                 var b = state.BlinkPlayer();
                 if (b == PlayerBlink.None) continue;
-                double starting = 0.0;
+
+                var starting = 0.0;
                 while (starting < 12.3)
                 {
                     var rand = state;
-                    //pktimer:ポケモン瞬きの発生タイミング
+                    // pktimer:ポケモン瞬きの発生タイミング
                     var pktimer = starting;
-                    //offset:前回主人公が瞬きしてからポケモンが瞬きした回数
+                    // offset:前回主人公が瞬きしてからポケモンが瞬きした回数
                     var offset = 0;
-                    //t:経過時間
+                    // t:経過時間
                     var t = 0.0;
-                    //j:stateを基点とするadvance(消費)
+                    // j:stateを基点とするadvance(消費)
                     var j = i+1;
-                    //prevIdx:前回の主人公の瞬き
+                    // prevIdx:前回の主人公の瞬き
                     var prevIdx = j;
-                    //c:主人公の瞬きカウンタ
+                    // c:主人公の瞬きカウンタ
                     var c = 0;
-                    while (c<intervals.Count)
+                    while (c < intervals.Count)
                     {
                         t += 61.0 / 60.0;
                         if (pktimer < t)

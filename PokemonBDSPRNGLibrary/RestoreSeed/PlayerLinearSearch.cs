@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using PokemonPRNG.XorShift128;
+using static System.Console;
 
 namespace PokemonBDSPRNGLibrary.RestoreSeed
 {
@@ -56,53 +57,55 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             }
         }
 
-        public IEnumerable<(uint index, double nextPokeBlink, (uint s0, uint s1, uint s2, uint s3) state)> SearchInNoisy((uint s0, uint s1, uint s2, uint s3) state, uint max, double dt)
+        public IEnumerable<(uint index, double nextPokeBlink, (uint s0, uint s1, uint s2, uint s3) state)> SearchInNoisy((uint s0, uint s1, uint s2, uint s3) state, uint max, double dt = 1.0/60.0)
         {
-            for (uint i = 0; i < max; i++)
+            for (int i = 0; i < max; i++)
             {
                 var b = state.BlinkPlayer();
                 if (b == PlayerBlink.None) continue;
-                var rand = state;
                 double starting = 0.0;
                 while (starting < 12.3)
                 {
+                    var rand = state;
                     //pktimer:ポケモン瞬きの発生タイミング
                     var pktimer = starting;
                     //offset:前回主人公が瞬きしてからポケモンが瞬きした回数
                     var offset = 0;
                     //t:経過時間
                     var t = 0.0;
+                    //j:stateを基点とするadvance(消費)
+                    var j = i+1;
                     //prevIdx:前回の主人公の瞬き
-                    var prevIdx = i;
-                    //j:現在のstateを基点とするadvance(消費)
-                    var j = prevIdx;
+                    var prevIdx = j;
                     //c:主人公の瞬きカウンタ
                     var c = 0;
                     while (c<intervals.Count)
                     {
                         t += 61.0 / 60.0;
-                        j++;
                         if (pktimer < t)
                         {
                             var pkInterval = rand.BlinkPokemon();
-                            pktimer += pkInterval;
                             j++;
+                            pktimer += pkInterval;
                             offset++;
                         }
-                        if (rand.BlinkPlayer() != PlayerBlink.None)
+                        var blink = rand.BlinkPlayer();
+                        j++;
+                        if (blink != PlayerBlink.None)
                         {
                             var interval = j - prevIdx - offset;
                             if (interval != intervals[c])
                                 break;
                             offset = 0;
                             prevIdx = j;
+                            c++;
                         }
                     }
                     if (c == intervals.Count)
                     {
                         var index = j;
                         var nextPokeBlink = pktimer - t;
-                        yield return (index, nextPokeBlink, rand);
+                        yield return ((uint)index, nextPokeBlink, rand);
                     }
                     starting += dt;
                 }

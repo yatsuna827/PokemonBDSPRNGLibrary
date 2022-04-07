@@ -172,13 +172,14 @@ else if(MODE == 3)
             Write($"{blink.ToShortString()} ");
         }
 
-        var (idx, _, restored) = searcher.SearchInNoisy(seed, 100000u).FirstOrDefault();
+        var (idx, rest, restored) = searcher.SearchInNoisy(seed, 100000u).FirstOrDefault();
 
         WriteLine();
 
         WriteLine($"expected: {adv}");
         WriteLine($"index: {idx}");
         WriteLine(adv == idx && restored == rand ? "Successfully restored." : "Failed...");
+        WriteLine(rest);
         ReadKey();
         WriteLine();
     }

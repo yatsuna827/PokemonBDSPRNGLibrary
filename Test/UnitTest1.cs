@@ -138,6 +138,47 @@ namespace Test
             rand.Equals(restored);
             rand.Equals(seed.Next(index));
         }
+
+        [Fact]
+        public void TestPlayerLinearSearchNoisy()
+        {
+            var seed = GenerateSeed();
+            var adv = 8270;
+            var rand = seed.Next((uint)adv);
+
+            var searcher = new PlayerLinearSearch();
+            var prev = -1;
+            var count = 0;
+
+            var pktimer = RandomRange(0.0, 12.0);
+            var t = 0.0;
+            for (int i = 0; count < 8; i++)
+            {
+                t += 61.0 / 60.0;
+                if (pktimer < t)
+                {
+                    adv++;
+                    pktimer += rand.BlinkPokemon();
+                }
+
+                adv++;
+                if (rand.BlinkPlayer() != PlayerBlink.None)
+                {
+                    if (prev != -1)
+                    {
+                        var interval = i - prev;
+                        searcher.AddInterval((uint)interval);
+                        count++;
+                    }
+                    prev = i;
+                }
+            }
+
+            var (index, restored) = searcher.Search(seed, 10000).FirstOrDefault();
+
+            rand.Equals(restored);
+            rand.Equals(seed.Next(index));
+        }
     }
 
     static class Ext

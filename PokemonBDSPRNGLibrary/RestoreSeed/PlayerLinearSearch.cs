@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PokemonPRNG.XorShift128;
-using static System.Console;
 
 namespace PokemonBDSPRNGLibrary.RestoreSeed
 {
@@ -60,7 +58,6 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
 
         private static bool CheckNoisy(ref (uint s0, uint s1, uint s2, uint s3) state, out uint advance, IEnumerable<uint> intervals, double pkTimerOffset, out double restTimer)
         {
-            var t = 0.0;
             advance = 0;
             restTimer = 0.0;
             var pkTimer = pkTimerOffset;
@@ -69,11 +66,11 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
                 var interval = 0;
                 while (true)
                 {
-                    t += 61.0 / 60.0;
                     if (++interval > observed) return false;
 
                     // ポケモンが瞬きをするフレームの場合
-                    if (pkTimer < t)
+                    pkTimer -= 61.0 / 60.0;
+                    if (pkTimer <= 0)
                     {
                         advance++;
                         pkTimer += state.BlinkPokemon();
@@ -89,7 +86,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
                 }
             }
 
-            restTimer = pkTimer - t;
+            restTimer = pkTimer;
             return true;
         }  
     }

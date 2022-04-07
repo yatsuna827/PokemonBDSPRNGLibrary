@@ -26,6 +26,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
                     {
                         var b = idx - lastBlink;
                         blinkCache[i] = b;
+                        i++;
                     }
                     lastBlink = idx;
                 }
@@ -43,11 +44,15 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             int head = 0, tail = intervals.Count;
             while (head <= max)
             {
-                while (state.BlinkPlayer() != PlayerBlink.None) idx++;
+                while (true)
+                {
+                    idx++;
+                    if (state.BlinkPlayer() != PlayerBlink.None)break;
+                }
                 var b = idx - lastBlink;
                 blinkCache[tail++ & 0xFF] = b;
+                if (check(head++)) yield return ((uint)lastBlink, state);
                 lastBlink = idx;
-                if (check(head++)) yield return ((uint)tail, state);
             }
         }
     }

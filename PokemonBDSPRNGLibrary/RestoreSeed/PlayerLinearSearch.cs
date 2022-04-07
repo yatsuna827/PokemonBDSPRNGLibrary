@@ -18,7 +18,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             var blinkCache = new int[256];
             var lastBlink = -1;
             var idx = 0;
-            for(int i = 0; i < intervals.Count; idx++;)
+            for(int i = 0; i < intervals.Count; idx++)
             {
                 if (state.BlinkPlayer() != PlayerBlink.None)
                 {
@@ -34,7 +34,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             {
                 for (int i = 0; i < intervals.Count; i++)
                 {
-                    var b = cache[(k + i) & 0xFF];
+                    var b = blinkCache[(k + i) & 0xFF];
                     if (intervals[i] != b) return false;
                 }
 

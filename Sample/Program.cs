@@ -12,7 +12,7 @@ uint RandomUint()
     return (RandomUint(), RandomUint(), RandomUint(), RandomUint());
 }
 
-const int MODE = 0; // 0: ゴンベのデモ, other: 主人公瞬きのデモ
+const int MODE = 2; // 0: ゴンベのデモ, 1: 主人公瞬きのデモ, 2:主人公瞬きからの再特定のデモ
 
 if(MODE == 0)
 {
@@ -48,7 +48,7 @@ if(MODE == 0)
         WriteLine();
     }
 }
-else
+else if(MODE == 1)
 {
     while (true)
     {
@@ -80,7 +80,60 @@ else
         WriteLine();
     }
 }
+else if(MODE == 2)
+{
+    
+    while (true)
+    {
+        var seed = GenerateSeed();
+        var seacher = new PlayerLinearSearch();
 
+        uint idx;
+        (uint, uint, uint, uint) restored;
+
+        var rand = seed;
+
+        var adv = 82782;
+        for (int i = 0; i < adv; i++) rand.BlinkPlayer();
+
+        var prev = -1;
+        var count = 0;
+        
+        while (true)
+        {
+            adv++;
+            // 観測値を取得
+            var blink = rand.BlinkPlayer();
+            if (blink != PlayerBlink.None)
+            {
+                var interval = adv - prev;
+                if (prev != -1)
+                {
+                    count++;
+                    seacher.AddInterval(interval);
+                }
+                prev = adv;
+            }
+
+            Write(blink == PlayerBlink.None ? "- " : blink == PlayerBlink.Single ? "s " : "d ");
+
+            if (count > 8)
+            {
+                (idx, restored) = seacher.Search(seed, 100000u).FirstOrDefault();
+                break;
+            }
+        }
+
+        WriteLine();
+
+        WriteLine($"expected: {prev.ToString()}");
+        WriteLine($"index: {idx.ToString()}");
+        WriteLine(adv == idx ? "Successfully restored." : "Failed...");
+        //WriteLine($"blink roll: {inverter.BlinkCount} times");
+        ReadKey();
+        WriteLine();
+    }
+}
 
 static class Ext
 {

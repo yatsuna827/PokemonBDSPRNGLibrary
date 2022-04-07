@@ -20,7 +20,7 @@ double RandomRange(double min, double max)
     return (RandomUint(), RandomUint(), RandomUint(), RandomUint());
 }
 
-const int MODE = 2; // 0: ゴンベのデモ, 1: 主人公瞬きのデモ, 2:主人公瞬きからの再特定のデモ  3:主人公瞬きからの再特定のデモ
+const int MODE = 3; // 0: ゴンベのデモ, 1: 主人公瞬きのデモ, 2:主人公瞬きからの再特定のデモ  3:主人公瞬きからの再特定のデモ
 
 if (MODE == 0)
 {
@@ -136,10 +136,8 @@ else if(MODE == 3)
         var seed = GenerateSeed();
         var searcher = new PlayerLinearSearch();
 
-        var rand = seed;
-
         var adv = 82782;
-        for (int i = 0; i < adv; i++) rand.BlinkPlayer();
+        var rand = seed.Next((uint)adv);
 
         var prev = -1;
         var count = 0;
@@ -162,16 +160,16 @@ else if(MODE == 3)
             adv++;
             if (blink != PlayerBlink.None)
             {
-                var interval = i - prev;
                 if (prev != -1)
                 {
+                    var interval = i - prev;
                     searcher.AddInterval((uint)interval);
                     count++;
                 }
                 prev = i;
             }
 
-            Write(blink == PlayerBlink.None ? "- " : blink == PlayerBlink.Single ? "s " : "d ");
+            Write($"{blink.ToShortString()} ");
         }
 
         var (idx, _, restored) = searcher.SearchInNoisy(seed, 100000u).FirstOrDefault();

@@ -5,11 +5,20 @@ using System.Linq;
 using PokemonBDSPRNGLibrary.RestoreSeed;
 using PokemonBDSPRNGLibrary.StarterRNG;
 using PokemonPRNG.XorShift128;
+using Xunit.Abstractions;
 
 namespace Test
 {
     public class UnitTest1
     {
+        private readonly ITestOutputHelper output;
+
+        public UnitTest1(ITestOutputHelper output)
+        {
+            this.output = output;
+        }
+
+
         private static uint RandomUint()
         {
             var random = new Random();
@@ -55,7 +64,7 @@ namespace Test
                 testCases.Add((seed, restored, intervals.ToArray()));
             }
 
-            testCases.TrueForAll(_ => _.restored == _.correct);
+            Assert.True(testCases.TrueForAll(_ => _.restored == _.correct));
         }
 
         [Fact]
@@ -84,7 +93,7 @@ namespace Test
                 testCases.Add((seed, restored));
             }
 
-            testCases.TrueForAll(_ => _.restored == _.correct);
+            Assert.True(testCases.TrueForAll(_ => _.restored == _.correct));
         }
 
         [Fact]
@@ -94,7 +103,7 @@ namespace Test
             var rand = seed;
 
             var idx = rand.GetNextPlayerBlink();
-            rand.Equals(seed.Next(idx));
+            Assert.Equal(rand, seed.Next(idx));
         }
 
         [Fact]
@@ -105,16 +114,16 @@ namespace Test
 
             var searcher = new MunchlaxLinearSearch();
 
-            searcher.AddInterval(rand.BlinkMunchlax().Randomize());
-            searcher.AddInterval(rand.BlinkMunchlax().Randomize());
-            searcher.AddInterval(rand.BlinkMunchlax().Randomize());
-            searcher.AddInterval(rand.BlinkMunchlax().Randomize());
-            searcher.AddInterval(rand.BlinkMunchlax().Randomize());
+            searcher.AddInterval(rand.BlinkMunchlax());
+            searcher.AddInterval(rand.BlinkMunchlax());
+            searcher.AddInterval(rand.BlinkMunchlax());
+            searcher.AddInterval(rand.BlinkMunchlax());
+            searcher.AddInterval(rand.BlinkMunchlax());
 
             var (i, restored) = searcher.Search(seed, 1000).FirstOrDefault();
 
-            rand.Equals(restored);
-            rand.Equals(seed.Next(i));
+            Assert.Equal(rand, restored);
+            Assert.Equal(rand, seed.Next(i));
         }
 
         [Fact]
@@ -135,8 +144,8 @@ namespace Test
 
             var (index, restored) = searcher.Search(seed, 1000).FirstOrDefault();
 
-            rand.Equals(restored);
-            rand.Equals(seed.Next(index));
+            Assert.Equal(rand, restored);
+            Assert.Equal(rand, seed.Next(index));
         }
 
         [Fact]
@@ -174,10 +183,10 @@ namespace Test
                 }
             }
 
-            var (index, restored) = searcher.Search(seed, 10000).FirstOrDefault();
+            var (index, _, restored) = searcher.SearchInNoisy(seed, 10000).FirstOrDefault();
 
-            rand.Equals(restored);
-            rand.Equals(seed.Next(index));
+            Assert.Equal(rand, restored);
+            Assert.Equal(rand, seed.Next(index));
         }
     }
 

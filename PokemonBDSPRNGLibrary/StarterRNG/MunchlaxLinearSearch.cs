@@ -35,8 +35,9 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
             int head = 0, tail = intervals.Count;
             while (head <= max)
             {
-                blinkCache[tail++ & 0xFF] = state.BlinkMunchlax();
                 if (check(head++)) yield return ((uint)tail, state);
+
+                blinkCache[tail++ & 0xFF] = state.BlinkMunchlax();
             }
         }
     }

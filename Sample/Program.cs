@@ -136,7 +136,7 @@ else if(MODE == 3)
         var seed = GenerateSeed();
         var searcher = new PlayerLinearSearch();
 
-        var adv = 82782;
+        var adv = 8270;
         var rand = seed.Next((uint)adv);
 
         var prev = -1;
@@ -172,14 +172,14 @@ else if(MODE == 3)
             Write($"{blink.ToShortString()} ");
         }
 
-        var (idx, rest, restored) = searcher.SearchInNoisy(seed, 100000u).FirstOrDefault();
+        var (idx, restored) = searcher.Search(seed, 10000u).FirstOrDefault();
 
         WriteLine();
 
         WriteLine($"expected: {adv}");
         WriteLine($"index: {idx}");
         WriteLine(adv == idx && restored == rand ? "Successfully restored." : "Failed...");
-        WriteLine(rest);
+        // WriteLine(rest);
         ReadKey();
         WriteLine();
     }

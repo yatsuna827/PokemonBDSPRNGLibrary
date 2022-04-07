@@ -18,5 +18,9 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             var r = state.GetRand() & 0xF;
             return r == 0 ? PlayerBlink.Single : r == 1 ? PlayerBlink.Double : PlayerBlink.None;
         }
+        public static float BlinkPokemon(this ref (uint s0, uint s1, uint s2, uint s3) state, float pokemonBlink = 0.285f)
+        {
+            return state.GetRand_f(3.0f, 12.0f) + pokemonBlink;
+        }
     }
 }

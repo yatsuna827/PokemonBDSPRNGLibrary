@@ -184,7 +184,8 @@ namespace Test
             }
 
             var (index, _, restored) = searcher.SearchInNoisy(seed, 10000).FirstOrDefault();
-
+            output.WriteLine($"{rand.ToHexString()}");
+            output.WriteLine($"{restored.ToHexString()}");
             Assert.Equal(rand, restored);
             Assert.Equal(rand, seed.Next(index));
         }

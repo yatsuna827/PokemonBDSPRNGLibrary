@@ -56,7 +56,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             }
         }
 
-        private static bool CheckNoisy(ref (uint s0, uint s1, uint s2, uint s3) state, out uint advance, IEnumerable<uint> intervals, double pkTimerOffset, out double restTimer)
+        private static bool CheckNoisy(ref (uint s0, uint s1, uint s2, uint s3) state, out uint advance, in IEnumerable<uint> intervals, double pkTimerOffset, out double restTimer)
         {
             advance = 0;
             restTimer = 0.0;

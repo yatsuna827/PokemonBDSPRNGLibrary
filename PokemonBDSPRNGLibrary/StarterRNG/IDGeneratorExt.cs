@@ -9,7 +9,7 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
     {
         public static (uint rawID, uint id_6dec) GenerateID(this (uint s0, uint s1, uint s2, uint s3) state)
         {
-            var raw = (state.GetRand() % 0xFFFFFFFF) + 0x80000000;
+            var raw = state.GetRand();
             return (raw, raw % 1_000_000);
         }
 

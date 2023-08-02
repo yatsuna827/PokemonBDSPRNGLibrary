@@ -37,7 +37,10 @@ namespace PokemonBDSPRNGLibrary.Generators
             var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (Nature)seed.GetRand(25);
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            var height = (byte)(seed.GetRand(129) + seed.GetRand(128));
+            var weight = (byte)(seed.GetRand(129) + seed.GetRand(128));
+
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
         }
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, Synchronize synchronize)
@@ -59,7 +62,10 @@ namespace PokemonBDSPRNGLibrary.Generators
             var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (uint)synchronize.FixedNature < 25 ? synchronize.FixedNature : (Nature)seed.GetRand(25);
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            var height = (byte)(seed.GetRand(129) + seed.GetRand(128));
+            var weight = (byte)(seed.GetRand(129) + seed.GetRand(128));
+
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
         }
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, CuteCharm cuteCharm)
@@ -81,7 +87,10 @@ namespace PokemonBDSPRNGLibrary.Generators
             var gender = seed.GenerateGender(_species.GenderRatio, cuteCharm.FixedGender);
             var nature = (Nature)seed.GetRand(25);
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            var height = (byte)(seed.GetRand(129) + seed.GetRand(128));
+            var weight = (byte)(seed.GetRand(129) + seed.GetRand(128));
+
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
         }
 
         public StaticSymbolGenerator(string name, uint lv, uint tsv, uint flawlessIVs = 0, bool hiddenAbility = false, bool neverShiny = false)

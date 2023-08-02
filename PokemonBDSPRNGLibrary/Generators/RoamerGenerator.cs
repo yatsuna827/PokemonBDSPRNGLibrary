@@ -40,7 +40,10 @@ namespace PokemonBDSPRNGLibrary.Generators
             var gender = rng.GenerateGender(_species.GenderRatio);
             var nature = (Nature)rng.GetRand(25);
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            var height = (byte)(rng.GetRand(129) + rng.GetRand(128));
+            var weight = (byte)(rng.GetRand(129) + rng.GetRand(128));
+
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
         }
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, Synchronize synchronize)
@@ -64,7 +67,10 @@ namespace PokemonBDSPRNGLibrary.Generators
             var gender = rng.GenerateGender(_species.GenderRatio);
             var nature = (uint)synchronize.FixedNature < 25 ? synchronize.FixedNature : (Nature)rng.GetRand(25);
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            var height = (byte)(rng.GetRand(129) + rng.GetRand(128));
+            var weight = (byte)(rng.GetRand(129) + rng.GetRand(128));
+
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
         }
 
         public RoamerGenerator(string name, uint lv, uint tsv, uint flawlessIVs = 3, bool neverShiny = false)

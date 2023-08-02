@@ -63,7 +63,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public bool TryRestoreState(out (uint s0, uint s1, uint s2, uint s3) state)
+        public bool TryRestoreState(out (uint S0, uint S1, uint S2, uint S3) state)
         {
             if (Entropy < 128)
             {

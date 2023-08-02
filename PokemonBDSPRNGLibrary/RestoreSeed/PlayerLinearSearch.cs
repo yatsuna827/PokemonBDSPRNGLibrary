@@ -13,7 +13,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
         {
             intervals.Add(interval);
         }
-        public IEnumerable<(uint index, (uint s0, uint s1, uint s2, uint s3) state)> Search((uint s0, uint s1, uint s2, uint s3) state, uint max)
+        public IEnumerable<(uint index, (uint S0, uint S1, uint S2, uint S3) state)> Search((uint S0, uint S1, uint S2, uint S3) state, uint max)
         {
             var indexQueue = new Queue<uint>();
             var intervalQueue = new Queue<uint>();
@@ -41,7 +41,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             }
         }
 
-        public IEnumerable<(uint index, double nextPokeBlink, (uint s0, uint s1, uint s2, uint s3) state)> SearchInNoisy((uint s0, uint s1, uint s2, uint s3) state, uint max, double dt = 1.0/60.0)
+        public IEnumerable<(uint index, double nextPokeBlink, (uint S0, uint S1, uint S2, uint S3) state)> SearchInNoisy((uint S0, uint S1, uint S2, uint S3) state, uint max, double dt = 1.0/60.0)
         {
             for (uint i = 1; i <= max; i++)
             {
@@ -56,7 +56,7 @@ namespace PokemonBDSPRNGLibrary.RestoreSeed
             }
         }
 
-        private static bool CheckNoisy(ref (uint s0, uint s1, uint s2, uint s3) state, out uint advance, in IEnumerable<uint> intervals, double pkTimerOffset, out double restTimer)
+        private static bool CheckNoisy(ref (uint S0, uint S1, uint S2, uint S3) state, out uint advance, in IEnumerable<uint> intervals, double pkTimerOffset, out double restTimer)
         {
             advance = 0;
             restTimer = 0.0;

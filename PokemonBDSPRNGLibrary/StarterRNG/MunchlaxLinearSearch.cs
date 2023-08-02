@@ -14,7 +14,7 @@ namespace PokemonBDSPRNGLibrary.StarterRNG
             intervals.Add(interval);
         }
 
-        public IEnumerable<(uint index, (uint s0, uint s1, uint s2, uint s3) state)> Search((uint s0, uint s1, uint s2, uint s3) state, uint max, float epsilon = 0.1f)
+        public IEnumerable<(uint index, (uint S0, uint S1, uint S2, uint S3) state)> Search((uint S0, uint S1, uint S2, uint S3) state, uint max, float epsilon = 0.1f)
         {
             var blinkCache = new float[256]; // 瞬き間隔をキャッシュしておく配列.
             for (int i = 0; i < intervals.Count; i++)

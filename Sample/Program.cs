@@ -9,7 +9,7 @@ using static System.Console;
 
 {
     var seed = (0x0u, 0x1u, 0x2u, 0x3u);
-    var gen = new StaticSymbolGenerator("ディアルガ", 47, 3);
+    var gen = new StaticSymbolGenerator("ディアルガ", 47, 0, 3);
     foreach(var (i, res) in seed.EnumerateSeed().EnumerateGeneration(gen).Take(100000).WithIndex().Where(_ => _.element.Shiny.IsShiny()))
     {
         WriteLine($"{i}[F] {string.Join("-", res.IVs)} {res.Shiny.ToSymbol()}");

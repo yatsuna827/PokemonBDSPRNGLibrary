@@ -10,10 +10,13 @@ namespace PokemonBDSPRNGLibrary.Generators
     public class StaticSymbolGenerator 
         : IGeneratable<Pokemon.Individual>, IGeneratable<Pokemon.Individual, Synchronize>, IGeneratable<Pokemon.Individual, CuteCharm>
     {
-        private readonly bool neverShiny;
-        private readonly uint flawlessIVs;
-        private readonly Pokemon.Species species;
-        private readonly uint lv;
+        private readonly bool _neverShiny;
+        private readonly bool _hiddenAbility;
+        private readonly uint _flawlessIVs;
+        private readonly Pokemon.Species _species;
+        private readonly uint _lv;
+
+        private readonly uint _tsv;
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed)
         {
@@ -22,15 +25,19 @@ namespace PokemonBDSPRNGLibrary.Generators
             var pid = seed.GetRand();
             var psv = pid.ToShinyValue();
 
-            var shinyType = neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
+            var shinyType = _neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
+            if (shinyType == 0 && pid.ToShinyType(_tsv) != 0)
+                pid ^= 0x10000000; // Antishiny
+            else if (shinyType != 0 && pid.ToShinyType(_tsv) == 0)
+                pid = (_tsv ^ pid) << 16 | pid & 0xFFFF;
 
-            var ivs = seed.GenerateIVs(flawlessIVs);
+            var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = seed.GetRand(2);
-            var gender = seed.GenerateGender(species.GenderRatio);
+            var ability = _hiddenAbility ? 2 : seed.GetRand(2);
+            var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (Nature)seed.GetRand(25);
 
-            return species.GetIndividual(lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
         }
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, Synchronize synchronize)
@@ -40,15 +47,19 @@ namespace PokemonBDSPRNGLibrary.Generators
             var pid = seed.GetRand();
             var psv = pid.ToShinyValue();
 
-            var shinyType = neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
+            var shinyType = _neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
+            if (shinyType == 0 && pid.ToShinyType(_tsv) != 0)
+                pid ^= 0x10000000; // Antishiny
+            else if (shinyType != 0 && pid.ToShinyType(_tsv) == 0)
+                pid = (_tsv ^ pid) << 16 | pid & 0xFFFF;
 
-            var ivs = seed.GenerateIVs(flawlessIVs);
+            var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = seed.GetRand(2);
-            var gender = seed.GenerateGender(species.GenderRatio);
+            var ability = _hiddenAbility ? 2 : seed.GetRand(2);
+            var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (uint)synchronize.FixedNature < 25 ? synchronize.FixedNature : (Nature)seed.GetRand(25);
 
-            return species.GetIndividual(lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
         }
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, CuteCharm cuteCharm)
@@ -58,19 +69,23 @@ namespace PokemonBDSPRNGLibrary.Generators
             var pid = seed.GetRand();
             var psv = pid.ToShinyValue();
 
-            var shinyType = neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
+            var shinyType = _neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
+            if (shinyType == 0 && pid.ToShinyType(_tsv) != 0)
+                pid ^= 0x10000000; // Antishiny
+            else if (shinyType != 0 && pid.ToShinyType(_tsv) == 0)
+                pid = (_tsv ^ pid) << 16 | pid & 0xFFFF;
 
-            var ivs = seed.GenerateIVs(flawlessIVs);
+            var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = seed.GetRand(2);
-            var gender = seed.GenerateGender(species.GenderRatio, cuteCharm.FixedGender);
+            var ability = _hiddenAbility ? 2 : seed.GetRand(2);
+            var gender = seed.GenerateGender(_species.GenderRatio, cuteCharm.FixedGender);
             var nature = (Nature)seed.GetRand(25);
 
-            return species.GetIndividual(lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
+            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
         }
 
-        public StaticSymbolGenerator(string name, uint lv, uint flawlessIVs = 0, bool neverShiny = false)
-            => (this.species, this.lv, this.flawlessIVs, this.neverShiny) = (Pokemon.GetPokemon(name), lv, flawlessIVs, neverShiny);
+        public StaticSymbolGenerator(string name, uint lv, uint tsv, uint flawlessIVs = 0, bool hiddenAbility = false, bool neverShiny = false)
+            => (_species, _lv, _flawlessIVs, _hiddenAbility, _neverShiny, _tsv) = (Pokemon.GetPokemon(name), lv, flawlessIVs, hiddenAbility, neverShiny, tsv);
     }
 
     public readonly struct Synchronize
@@ -124,7 +139,7 @@ namespace PokemonBDSPRNGLibrary.Generators
             return sv == 0 ? ShinyType.Square : ShinyType.Star;
         }
 
-        public static uint[] GenerateIVs(ref this (uint s0, uint s1, uint s2, uint s3) seed, uint flawlessIVs)
+        public static uint[] GenerateIVs(ref this (uint S0, uint S1, uint S2, uint S3) seed, uint flawlessIVs)
         {
             var ivs = Enumerable.Repeat(32u, 6).ToArray();
             for (int i = 0; i < flawlessIVs; i++)
@@ -143,7 +158,7 @@ namespace PokemonBDSPRNGLibrary.Generators
                 if (ivs[i] == 32) ivs[i] = seed.GetRand(32);
 
             return ivs;
-        } 
+        }
 
         public static Gender? ToFixedGender(this GenderRatio ratio)
         {
@@ -156,10 +171,10 @@ namespace PokemonBDSPRNGLibrary.Generators
             }
         }
 
-        public static Gender GenerateGender(ref this (uint s0, uint s1, uint s2, uint s3) seed, GenderRatio ratio)
+        public static Gender GenerateGender(ref this (uint S0, uint S1, uint S2, uint S3) seed, GenderRatio ratio)
             => ratio.ToFixedGender() ?? ((seed.GetRand(253) + 1) < (uint)ratio ? Gender.Female : Gender.Male);
 
-        public static Gender GenerateGender(ref this (uint s0, uint s1, uint s2, uint s3) seed, GenderRatio ratio, Gender cuteCharmGender)
+        public static Gender GenerateGender(ref this (uint S0, uint S1, uint S2, uint S3) seed, GenderRatio ratio, Gender cuteCharmGender)
             => ratio.ToFixedGender() ??
                 ((cuteCharmGender != Gender.Genderless && seed.GetRand(3) != 0) ? cuteCharmGender :
                 ((seed.GetRand(253) + 1) < (uint)ratio ? Gender.Female : Gender.Male));

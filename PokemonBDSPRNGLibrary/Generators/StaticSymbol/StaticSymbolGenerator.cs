@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using PokemonPRNG.XorShift128;
-using PokemonStandardLibrary.CommonExtension;
 using PokemonStandardLibrary.Gen8;
 using PokemonStandardLibrary;
 
 namespace PokemonBDSPRNGLibrary.Generators
 {
-    public class StaticSymbolGenerator
+    public class StaticSymbolGenerator 
+        : IGeneratable<Pokemon.Individual>, IGeneratable<Pokemon.Individual, Synchronize>, IGeneratable<Pokemon.Individual, CuteCharm>
     {
         private readonly bool neverShiny;
         private readonly uint flawlessIVs;
         private readonly Pokemon.Species species;
         private readonly uint lv;
 
-        public Pokemon.Individual Generate((uint s0, uint s1, uint s2, uint s3) seed)
+        public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed)
         {
             var ec = seed.GetRand();
             var tempTSV = seed.GetRand().ToShinyValue();
@@ -33,7 +33,7 @@ namespace PokemonBDSPRNGLibrary.Generators
             return species.GetIndividual(lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
         }
 
-        public Pokemon.Individual Generate((uint s0, uint s1, uint s2, uint s3) seed, in Synchronize synchronize)
+        public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, Synchronize synchronize)
         {
             var ec = seed.GetRand();
             var tempTSV = seed.GetRand().ToShinyValue();
@@ -51,7 +51,7 @@ namespace PokemonBDSPRNGLibrary.Generators
             return species.GetIndividual(lv, ivs, ec, pid, nature, ability, gender).SetShinyType(shinyType);
         }
 
-        public Pokemon.Individual Generate((uint s0, uint s1, uint s2, uint s3) seed, in CuteCharm cuteCharm)
+        public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, CuteCharm cuteCharm)
         {
             var ec = seed.GetRand();
             var tempTSV = seed.GetRand().ToShinyValue();
@@ -84,6 +84,31 @@ namespace PokemonBDSPRNGLibrary.Generators
         public Gender FixedGender { get; }
         public CuteCharm(Gender gender)
             => FixedGender = gender;
+    }
+
+    public class StaticSymbolCriteria
+    {
+        private Nature? nature;
+        private uint[] stats;
+
+        public bool Fulfills(Pokemon.Individual individual)
+        {
+            if (stats != null && !individual.Stats.SequenceEqual(stats)) return false;
+            if (nature.HasValue && individual.Nature != nature.Value) return false;
+
+            return true;
+        }
+
+        public StaticSymbolCriteria SetNature(Nature nature)
+        {
+            this.nature = nature;
+            return this;
+        }
+        public StaticSymbolCriteria SetStats(uint[] stats)
+        {
+            this.stats = stats;
+            return this;
+        }
     }
 
     static class GenerationExt

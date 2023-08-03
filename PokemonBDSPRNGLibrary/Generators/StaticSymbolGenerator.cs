@@ -4,6 +4,7 @@ using System.Linq;
 using PokemonPRNG.XorShift128;
 using PokemonStandardLibrary.Gen8;
 using PokemonStandardLibrary;
+using PokemonBDSPRNGLibrary.StarterRNG;
 
 namespace PokemonBDSPRNGLibrary.Generators
 {
@@ -21,16 +22,7 @@ namespace PokemonBDSPRNGLibrary.Generators
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed)
         {
             var ec = seed.GetRand();
-            var tempTSV = seed.GetRand().ToShinyValue();
-            var pid = seed.GetRand();
-            var psv = pid.ToShinyValue();
-
-            var shinyType = _neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
-            if (shinyType == 0 && pid.ToShinyType(_tsv) != 0)
-                pid ^= 0x10000000; // Antishiny
-            else if (shinyType != 0 && pid.ToShinyType(_tsv) == 0)
-                pid = (_tsv ^ pid) << 16 | pid & 0xFFFF;
-
+            var pid = seed.GeneratePID(_tsv, _neverShiny);
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
             var ability = _hiddenAbility ? 2 : seed.GetRand(2);
@@ -40,22 +32,15 @@ namespace PokemonBDSPRNGLibrary.Generators
             var height = (byte)(seed.GetRand(129) + seed.GetRand(128));
             var weight = (byte)(seed.GetRand(129) + seed.GetRand(128));
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
+            return _species
+                .GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight)
+                .SetShinyType(pid.ToShinyValue().ToShinyType(_tsv));
         }
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, Synchronize synchronize)
         {
             var ec = seed.GetRand();
-            var tempTSV = seed.GetRand().ToShinyValue();
-            var pid = seed.GetRand();
-            var psv = pid.ToShinyValue();
-
-            var shinyType = _neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
-            if (shinyType == 0 && pid.ToShinyType(_tsv) != 0)
-                pid ^= 0x10000000; // Antishiny
-            else if (shinyType != 0 && pid.ToShinyType(_tsv) == 0)
-                pid = (_tsv ^ pid) << 16 | pid & 0xFFFF;
-
+            var pid = seed.GeneratePID(_tsv, _neverShiny);
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
             var ability = _hiddenAbility ? 2 : seed.GetRand(2);
@@ -65,22 +50,15 @@ namespace PokemonBDSPRNGLibrary.Generators
             var height = (byte)(seed.GetRand(129) + seed.GetRand(128));
             var weight = (byte)(seed.GetRand(129) + seed.GetRand(128));
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
+            return _species
+                .GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight)
+                .SetShinyType(pid.ToShinyValue().ToShinyType(_tsv));
         }
 
         public Pokemon.Individual Generate((uint S0, uint S1, uint S2, uint S3) seed, CuteCharm cuteCharm)
         {
             var ec = seed.GetRand();
-            var tempTSV = seed.GetRand().ToShinyValue();
-            var pid = seed.GetRand();
-            var psv = pid.ToShinyValue();
-
-            var shinyType = _neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
-            if (shinyType == 0 && pid.ToShinyType(_tsv) != 0)
-                pid ^= 0x10000000; // Antishiny
-            else if (shinyType != 0 && pid.ToShinyType(_tsv) == 0)
-                pid = (_tsv ^ pid) << 16 | pid & 0xFFFF;
-
+            var pid = seed.GeneratePID(_tsv, _neverShiny);
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
             var ability = _hiddenAbility ? 2 : seed.GetRand(2);
@@ -90,7 +68,9 @@ namespace PokemonBDSPRNGLibrary.Generators
             var height = (byte)(seed.GetRand(129) + seed.GetRand(128));
             var weight = (byte)(seed.GetRand(129) + seed.GetRand(128));
 
-            return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
+            return _species
+                .GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight)
+                .SetShinyType(pid.ToShinyValue().ToShinyType(_tsv));
         }
 
         public StaticSymbolGenerator(string name, uint lv, uint tsv, uint flawlessIVs = 0, bool hiddenAbility = false, bool neverShiny = false)
@@ -146,6 +126,21 @@ namespace PokemonBDSPRNGLibrary.Generators
             if (sv >= 16) return ShinyType.NotShiny;
 
             return sv == 0 ? ShinyType.Square : ShinyType.Star;
+        }
+
+        public static uint GeneratePID(ref this (uint S0, uint S1, uint S2, uint S3) seed, uint tsv, bool neverShiny = false)
+        {
+            var tempTSV = seed.GetRand().ToShinyValue();
+            var pid = seed.GetRand();
+            var psv = pid.ToShinyValue();
+
+            var shinyType = neverShiny ? ShinyType.NotShiny : psv.ToShinyType(tempTSV);
+            if (shinyType == 0 && psv.ToShinyType(tsv) != 0)
+                pid ^= 0x10000000; // Antishiny
+            else if (shinyType != 0 && psv.ToShinyType(tsv) == 0)
+                pid = (tsv ^ pid) << 16 | pid & 0xFFFF;
+
+            return pid;
         }
 
         public static uint[] GenerateIVs(ref this (uint S0, uint S1, uint S2, uint S3) seed, uint flawlessIVs)

@@ -25,7 +25,8 @@ namespace PokemonBDSPRNGLibrary.Generators
             var pid = seed.GeneratePID(_tsv, _neverShiny);
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = _hiddenAbility ? 2 : seed.GetRand(2);
+            var ability = seed.GetRand(2);
+            if (_hiddenAbility) ability = 2;
             var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (Nature)seed.GetRand(25);
 
@@ -43,7 +44,8 @@ namespace PokemonBDSPRNGLibrary.Generators
             var pid = seed.GeneratePID(_tsv, _neverShiny);
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = _hiddenAbility ? 2 : seed.GetRand(2);
+            var ability = seed.GetRand(2);
+            if (_hiddenAbility) ability = 2;
             var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (uint)synchronize.FixedNature < 25 ? synchronize.FixedNature : (Nature)seed.GetRand(25);
 
@@ -61,7 +63,8 @@ namespace PokemonBDSPRNGLibrary.Generators
             var pid = seed.GeneratePID(_tsv, _neverShiny);
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = _hiddenAbility ? 2 : seed.GetRand(2);
+            var ability = seed.GetRand(2);
+            if (_hiddenAbility) ability = 2;
             var gender = seed.GenerateGender(_species.GenderRatio, cuteCharm.FixedGender);
             var nature = (Nature)seed.GetRand(25);
 
